@@ -42,7 +42,6 @@ function useLiveCountdown(targetDateStr: string): CountdownTime {
   const [timeLeft, setTimeLeft] = useState<CountdownTime>(calculate);
 
   useEffect(() => {
-    setTimeLeft(calculate());
     const timer = setInterval(() => {
       setTimeLeft(calculate());
     }, 1000);
@@ -51,6 +50,40 @@ function useLiveCountdown(targetDateStr: string): CountdownTime {
 
   return timeLeft;
 }
+
+// Dedicated Memoized Countdown Card for high-FPS ticking
+const CountdownCard: React.FC<{ label: string; val: number; sub: string; idx: number }> = React.memo(({ label, val, sub, idx }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9, y: 15 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ delay: 0.08 + idx * 0.05, duration: 0.4 }}
+      className="relative group flex flex-col items-center justify-center p-3 sm:p-5 rounded-2xl sm:rounded-3xl bg-black/65 border border-[#d4af37]/45 hover:border-[#d4af37] backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.6)] transition-all duration-200 overflow-hidden transform-gpu"
+      style={{ transform: 'translateZ(0)' }}
+    >
+      {/* Subtle top light highlight */}
+      <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+      
+      {/* Digits with smooth tick transition */}
+      <div className="relative flex items-center justify-center h-11 sm:h-16 md:h-20 w-full overflow-hidden">
+        <span
+          key={val}
+          className="font-sans font-black text-3xl sm:text-5xl md:text-6xl tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white via-white/95 to-[#f4e5a9] drop-shadow-[0_4px_16px_rgba(212,175,55,0.4)]"
+        >
+          {String(val).padStart(2, '0')}
+        </span>
+      </div>
+
+      {/* Unit Label */}
+      <span className="mt-1 sm:mt-1.5 text-[10px] sm:text-xs font-extrabold tracking-[0.2em] text-[#d4af37] font-mono uppercase">
+        {label}
+      </span>
+      <span className="text-[9px] sm:text-[10px] text-white/45 font-serif mt-0.5">
+        {sub}
+      </span>
+    </motion.div>
+  );
+});
 
 // Illustrated Durga Puja Typography Title Banners for each day
 const DAY_DOODLE_TITLES: Record<string, string> = {
@@ -236,49 +269,22 @@ export const FestivalHero: React.FC<FestivalHeroProps> = ({
           {/* Real-time Live Countdown Grid: Days, Hours, Mins, Secs */}
           <div className="relative my-3 sm:my-5 w-full max-w-md sm:max-w-xl md:max-w-2xl mx-auto px-1">
             {/* Ambient warm aura behind countdown */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#d4af37]/30 via-[#f97316]/25 to-[#e11d48]/30 blur-3xl opacity-85 pointer-events-none rounded-3xl" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#d4af37]/25 via-[#f97316]/20 to-[#e11d48]/25 blur-xl opacity-75 pointer-events-none rounded-3xl" />
 
             <div className="grid grid-cols-4 gap-2 sm:gap-4 relative z-10">
               {[
-                { label: 'DAYS', val: countdown.days, sub: 'দিন', color: 'from-[#ffd700] to-[#f59e0b]' },
-                { label: 'HOURS', val: countdown.hours, sub: 'ঘণ্টা', color: 'from-[#fef08a] to-[#eab308]' },
-                { label: 'MINS', val: countdown.minutes, sub: 'মিনিট', color: 'from-[#fed7aa] to-[#f97316]' },
-                { label: 'SECS', val: countdown.seconds, sub: 'সেকেন্ড', color: 'from-[#fecdd3] to-[#f43f5e]' },
+                { label: 'DAYS', val: countdown.days, sub: 'দিন' },
+                { label: 'HOURS', val: countdown.hours, sub: 'ঘণ্টা' },
+                { label: 'MINS', val: countdown.minutes, sub: 'মিনিট' },
+                { label: 'SECS', val: countdown.seconds, sub: 'সেকেন্ড' },
               ].map((item, idx) => (
-                <motion.div
+                <CountdownCard
                   key={item.label}
-                  initial={{ opacity: 0, scale: 0.9, y: 15 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ delay: 0.12 + idx * 0.08, duration: 0.5 }}
-                  className="relative group flex flex-col items-center justify-center p-3 sm:p-5 rounded-2xl sm:rounded-3xl bg-black/65 border border-[#d4af37]/45 hover:border-[#d4af37] backdrop-blur-2xl shadow-[0_10px_35px_rgba(0,0,0,0.7)] transition-all duration-300 overflow-hidden"
-                >
-                  {/* Subtle top light highlight */}
-                  <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 to-transparent" />
-                  
-                  {/* Digits with smooth tick transition */}
-                  <div className="relative flex items-center justify-center h-11 sm:h-16 md:h-20 w-full overflow-hidden">
-                    <AnimatePresence mode="popLayout">
-                      <motion.span
-                        key={item.val}
-                        initial={{ y: 8, opacity: 0.4 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: -8, opacity: 0.4 }}
-                        transition={{ duration: 0.22, ease: 'easeOut' }}
-                        className="font-sans font-black text-3xl sm:text-5xl md:text-6xl tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white via-white/95 to-[#f4e5a9] drop-shadow-[0_4px_20px_rgba(212,175,55,0.45)]"
-                      >
-                        {String(item.val).padStart(2, '0')}
-                      </motion.span>
-                    </AnimatePresence>
-                  </div>
-
-                  {/* Unit Label */}
-                  <span className="mt-1 sm:mt-1.5 text-[10px] sm:text-xs font-extrabold tracking-[0.2em] text-[#d4af37] font-mono uppercase">
-                    {item.label}
-                  </span>
-                  <span className="text-[9px] sm:text-[10px] text-white/45 font-serif mt-0.5">
-                    {item.sub}
-                  </span>
-                </motion.div>
+                  label={item.label}
+                  val={item.val}
+                  sub={item.sub}
+                  idx={idx}
+                />
               ))}
             </div>
           </div>
