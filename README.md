@@ -1,6 +1,6 @@
 Project for Hackrit 2.0 24Hr Hackathon
-Made by: Samriddhi Ray (Lead)
-         Satadru Addya
+Made by: Samriddhi Ray (Lead),
+         Satadru Addya,
          Soutrik Dutta
          
 🪔 SHARODSHAVA (শারদোৎসব) — Kolkata Durga Puja 2026 Planner
